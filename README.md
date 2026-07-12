@@ -25,24 +25,37 @@ An intelligent, full-stack AI-powered library assistant built with **Python Flas
 
 ## 🗂️ Project Structure
 
-```
-library-agent/
-├── app.py                    # Flask backend + AGENT_INSTRUCTIONS
-├── requirements.txt          # Python dependencies
-├── .env.example              # Environment variable template
-├── .env                      # Your actual secrets (never commit!)
+
+
+```text
+Library-AI-Agent/
+├── app.py                  # Main Flask application
+├── models.py               # Database models
+├── requirements.txt        # Project dependencies
+├── README.md               # Project documentation
+├── LICENSE                 # License file
+├── .env.example            # Environment variables template
+├── .gitignore              # Git ignore rules
 │
 ├── data/
-│   └── library_data.json     # 25-book catalog + journals + library info
+│   └── library_data.json   # Library books and journal data
+│
+├── library/
+│   └── library.db          # SQLite database
+│
+├── modules/                # Helper modules
 │
 ├── templates/
-│   └── index.html            # Single-page application shell
+│   ├── index.html
+│   └── admin_panel.html
 │
 └── static/
     ├── css/
-    │   └── style.css         # Full custom stylesheet (light + dark)
-    └── js/
-        └── app.js            # Frontend logic (chat, search, profiles)
+    │   └── style.css
+    ├── js/
+    │   └── app.js
+    └── images/
+```
 ```
 
 ---
