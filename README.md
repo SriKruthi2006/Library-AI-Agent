@@ -53,10 +53,10 @@ Library-AI-Agent/
     ├── css/
     │   └── style.css
     ├── js/
-    │   └── app.js
-    └── images/
+       └── app.js
+    
 ```
-```
+
 
 ---
 
@@ -99,7 +99,6 @@ Edit `.env` and fill in your credentials:
 IBM_API_KEY=your_ibm_cloud_api_key_here
 WATSONX_PROJECT_ID=your_watsonx_project_id_here
 WATSONX_URL=https://us-south.ml.cloud.ibm.com
-FLASK_SECRET_KEY=a-long-random-secret-key
 ```
 
 ### 5. Run the application
