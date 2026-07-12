@@ -291,7 +291,7 @@ db = SQLAlchemy(app)
 Flask==3.0.3
 Flask-Session==0.8.0
 python-dotenv==1.0.1
-ibm-watsonx-ai==1.1.2
+ibm-watsonx-ai==1.5.14
 requests==2.32.3
 Werkzeug==3.0.3
 gunicorn==22.0.0
@@ -308,11 +308,13 @@ MIT License — free to use, modify, and deploy.
 
 ## 🙏 Acknowledgements
 
-- **IBM watsonx.ai** — [ibm.com/watsonx](https://www.ibm.com/watsonx)
-- **IBM Granite** — open-source foundation models
-- **Flask** — lightweight Python web framework
-- **Bootstrap 5** — responsive CSS framework
+This project was developed using the following technologies and platforms:
 
----
+- IBM watsonx.ai™ – AI Studio for building and deploying generative AI applications
+- IBM Granite Foundation Models – Large Language Models powering the AI assistant
+- IBM Cloud – Secure cloud platform for AI services and deployment
+- Flask – Lightweight Python web framework
+- Bootstrap 5 – Responsive front-end framework
+- Render – Cloud hosting and deployment platform
 
-*Built with ❤️ for university students and researchers.*
+*Built with 💙 for students, researchers, and libraries.*
