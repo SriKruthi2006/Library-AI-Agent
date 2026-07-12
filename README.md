@@ -302,11 +302,13 @@ MIT License — free to use, modify, and deploy.
 
 This project was developed using the following technologies and platforms:
 
-- IBM watsonx.ai™ – AI Studio and Foundation Models for building generative AI applications
-- IBM Granite Foundation Models – Powering the AI-powered library assistant
-- IBM Cloud – Secure cloud platform for AI services and deployment
-- Flask – Lightweight Python web framework
-- Bootstrap 5 – Responsive front-end framework
-- Render – Cloud hosting and deployment platform
+- **IBM watsonx.ai™** – Enterprise AI Studio for building and deploying generative AI applications.
+- **IBM Granite Foundation Models** – Large Language Models powering the AI-powered library assistant.
+- **IBM Cloud** – Secure cloud platform for AI services, model deployment, and application hosting.
+- **Flask** – Lightweight Python web framework for backend development.
+- **Bootstrap 5** – Responsive front-end framework for building a modern user interface.
+- **Render** – Cloud platform used for deploying and hosting the application.
 
-*Built with 💙 for students, researchers, and libraries.*
+---
+
+*Built with 💙 to make library access smarter, faster, and more intelligent for students, researchers, and libraries.*
