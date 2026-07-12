@@ -5,6 +5,28 @@ An intelligent, full-stack AI-powered library assistant built with **Python Flas
 
 ---
 
+# 📚 Library AI Agent
+
+Powered by IBM watsonx.ai™ and IBM Granite Foundation Models
+
+Project description...
+
+## 🚀 Live Deployment
+
+| Resource | Link |
+|----------|------|
+| 🌐 Live Application | https://library-ai-agent-8i4r.onrender.com |
+| 📂 GitHub Repository | https://github.com/SriKruthi2006/Library-AI-Agent |
+
+### Deployment Details
+- **Hosting Platform:** Render
+- **Backend Framework:** Flask
+- **AI Platform:** IBM watsonx.ai™
+- **Foundation Model:** IBM Granite
+- **Programming Language:** Python
+
+...
+
 ## ✨ Features
 
 | Feature | Description |
@@ -177,28 +199,6 @@ model_id = "ibm/granite-13b-chat-v2"     # Swap for other Granite variants
 | `ibm/granite-3-8b-instruct` | Granite 3 — compact & fast |
 | `ibm/granite-3-2b-instruct` | Granite 3 — ultra-fast |
 
----
-
-## 📊 API Reference
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | GET | Main application UI |
-| `/api/chat` | POST | Send a message to the AI librarian |
-| `/api/search?q=` | GET | Search books by keyword |
-| `/api/search?course=` | GET | Browse books by course |
-| `/api/book/<id>` | GET | Get book detail + similar books |
-| `/api/summary/<id>` | GET | Generate AI summary for a book |
-| `/api/reserve/<id>` | POST | Reserve a book |
-| `/api/reserve/<id>` | DELETE | Cancel reservation |
-| `/api/profile` | GET/POST | Get / save user profile |
-| `/api/history` | GET | Get borrowing history |
-| `/api/library-info` | GET | Library timings, rules, services |
-| `/api/courses` | GET | Available courses + journals |
-| `/api/stats` | GET | Dashboard statistics |
-| `/api/clear-chat` | POST | Clear session chat history |
-
----
 
 ## 🌍 Production Deployment
 
@@ -310,8 +310,8 @@ MIT License — free to use, modify, and deploy.
 
 This project was developed using the following technologies and platforms:
 
-- IBM watsonx.ai™ – AI Studio for building and deploying generative AI applications
-- IBM Granite Foundation Models – Large Language Models powering the AI assistant
+- IBM watsonx.ai™ – AI Studio and Foundation Models for building generative AI applications
+- IBM Granite Foundation Models – Powering the AI-powered library assistant
 - IBM Cloud – Secure cloud platform for AI services and deployment
 - Flask – Lightweight Python web framework
 - Bootstrap 5 – Responsive front-end framework
