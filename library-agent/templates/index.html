@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library AI Agent — Powered by IBM Granite</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     TOP NAVBAR
+════════════════════════════════════════════════════════════════════════════ -->
+<nav class="navbar navbar-expand-lg fixed-top app-navbar" id="mainNavbar">
+  <div class="container-fluid px-3 px-md-4">
+
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div class="brand-icon">
+        <i class="bi bi-book-half"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Library AI Agent</span>
+        <span class="brand-sub d-none d-md-block">Powered by IBM Granite</span>
+      </div>
+    </a>
+
+    <!-- Nav Controls -->
+    <div class="d-flex align-items-center gap-2 ms-auto">
+
+      <!-- Nav Links (desktop) -->
+      <ul class="navbar-nav flex-row d-none d-lg-flex gap-1 me-2">
+        <li class="nav-item">
+          <button class="nav-btn" id="navDashboard" onclick="showView('dashboard')">
+            <i class="bi bi-grid-3x3-gap"></i> Dashboard
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navChat" onclick="showView('chat')" >
+            <i class="bi bi-chat-dots"></i> Chat
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navSearch" onclick="showView('search')">
+            <i class="bi bi-search"></i> Search
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navProfile" onclick="showView('profile')">
+            <i class="bi bi-person-circle"></i> Profile
+          </button>
+        </li>
+      </ul>
+
+      <!-- Notifications Bell -->
+      <button class="icon-btn position-relative" id="notifBell" title="Notifications" onclick="toggleNotifPanel()">
+        <i class="bi bi-bell-fill"></i>
+        <span class="notif-badge d-none" id="notifBadge">0</span>
+      </button>
+
+      <!-- Auth button / user menu -->
+      <div id="authNavArea" class="position-relative">
+
+        <!-- Logged-out: plain login button -->
+        <button class="nav-btn" id="authLoginBtn" onclick="openAuthModal('login')">
+          <i class="bi bi-person-lock me-1"></i>Login
+        </button>
+
+        <!-- Logged-in: Bootstrap dropdown -->
+        <div class="dropdown d-none" id="authUserDropdown">
+          <button class="nav-btn dropdown-toggle-none" id="authUserBtn"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle me-1"></i>
+            <span id="authUserLabel">User</span>
+            <i class="bi bi-chevron-down ms-1" style="font-size:10px;opacity:.7"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end auth-user-menu" aria-labelledby="authUserBtn">
+            <li>
+              <button class="dropdown-item auth-menu-item" onclick="showView('profile'); document.getElementById('profileFormSection')?.scrollIntoView({behavior:'smooth'})">
+                <i class="bi bi-person-circle me-2"></i>My Profile
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item auth-menu-item" onclick="showView('profile'); setTimeout(()=>document.getElementById('reservationsSection')?.scrollIntoView({behavior:'smooth'}),80)">
+                <i class="bi bi-bookmark-check me-2"></i>My Reservations
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item auth-menu-item" onclick="showView('profile'); setTimeout(()=>document.getElementById('historySection')?.scrollIntoView({behavior:'smooth'}),80)">
+                <i class="bi bi-clock-history me-2"></i>Borrowing History
+              </button>
+            </li>
+            <li><hr class="dropdown-divider auth-menu-divider"></li>
+            <li>
+              <button class="dropdown-item auth-menu-item auth-menu-logout" onclick="doLogout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Dark-mode toggle -->
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode">
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+      </button>
+
+      <!-- Mobile hamburger -->
+      <button class="icon-btn d-lg-none" id="mobileMenuBtn" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Notification Dropdown Panel -->
+<div class="notif-panel d-none" id="notifPanel">
+  <div class="notif-panel-header">
+    <span><i class="bi bi-bell-fill me-1" style="color:var(--gold)"></i>Notifications</span>
+    <span class="notif-unread-label" id="notifUnreadLabel"></span>
+  </div>
+  <div id="notifList" style="max-height:320px;overflow-y:auto"></div>
+  <div class="notif-panel-footer">
+    <button class="notif-clear-btn" id="notifClearAll" onclick="clearAllNotifications()">
+      <i class="bi bi-trash3 me-1"></i>Clear All
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Off-canvas Menu -->
+<div class="offcanvas offcanvas-start" id="mobileMenu" tabindex="-1">
+  <div class="offcanvas-header">
+    <h6 class="offcanvas-title fw-bold"><i class="bi bi-book-half me-2"></i>Library AI Agent</h6>
+    <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <div class="mobile-nav">
+      <button class="mobile-nav-item" onclick="showView('dashboard'); document.getElementById('mobileMenu').dispatchEvent(new Event('hide.bs.offcanvas'))">
+        <i class="bi bi-grid-3x3-gap"></i> Dashboard
+      </button>
+      <button class="mobile-nav-item" onclick="showView('chat'); document.getElementById('mobileMenu').dispatchEvent(new Event('hide.bs.offcanvas'))">
+        <i class="bi bi-chat-dots"></i> AI Chat
+      </button>
+      <button class="mobile-nav-item" onclick="showView('search'); document.getElementById('mobileMenu').dispatchEvent(new Event('hide.bs.offcanvas'))">
+        <i class="bi bi-search"></i> Book Search
+      </button>
+      <button class="mobile-nav-item" onclick="showView('profile'); document.getElementById('mobileMenu').dispatchEvent(new Event('hide.bs.offcanvas'))">
+        <i class="bi bi-person-circle"></i> Profile
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MAIN CONTENT AREA
+════════════════════════════════════════════════════════════════════════════ -->
+<main class="main-content" id="mainContent">
+
+  <!-- ───────────────────────── DASHBOARD VIEW ──────────────────────────── -->
+  <section id="viewDashboard" class="view-section active">
+    <div class="container-fluid px-3 px-md-4">
+
+      <!-- Hero Banner -->
+      <div class="hero-banner mb-4">
+        <div class="hero-content">
+          <h1 class="hero-title">Welcome to <span style="color:var(--gold)">University Central Library</span></h1>
+          <p class="hero-subtitle">Discover books, journals, research papers, and AI-powered recommendations — all in one place.</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-primary-custom" onclick="showView('chat')">
+              <i class="bi bi-robot me-2"></i>Ask AI Librarian
+            </button>
+            <button class="btn btn-outline-custom" onclick="showView('search')">
+              <i class="bi bi-search me-2"></i>Search Catalog
+            </button>
+          </div>
+        </div>
+        <div class="hero-illustration d-none d-md-flex">
+          <div class="float-books">
+            <div class="float-book fb1"><i class="bi bi-book"></i></div>
+            <div class="float-book fb2"><i class="bi bi-journal-text"></i></div>
+            <div class="float-book fb3"><i class="bi bi-file-earmark-pdf"></i></div>
+            <div class="float-book fb4"><i class="bi bi-mortarboard"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="row g-3 mb-4" id="statsRow">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--accent-light);color:var(--accent)">
+              <i class="bi bi-book-fill"></i>
+            </div>
+            <div class="stat-body">
+              <div class="stat-value" id="statTitles">—</div>
+              <div class="stat-label">Book Titles</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="stat-body">
+              <div class="stat-value" id="statAvail">—</div>
+              <div class="stat-label">Available Now</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706">
+              <i class="bi bi-journals"></i>
+            </div>
+            <div class="stat-body">
+              <div class="stat-value" id="statJournals">—</div>
+              <div class="stat-label">Journals</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">
+              <i class="bi bi-cpu"></i>
+            </div>
+            <div class="stat-body">
+              <div class="stat-value">IBM</div>
+              <div class="stat-label">Granite AI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column layout: Quick search + Library Info -->
+      <div class="row g-3 mb-4">
+        <!-- Quick AI Ask -->
+        <div class="col-lg-7">
+          <div class="card-custom h-100">
+            <div class="card-custom-header">
+              <i class="bi bi-robot me-2 text-accent"></i>Quick AI Recommendation
+            </div>
+            <div class="card-custom-body">
+              <p class="text-muted-sm mb-3">Ask anything — I'll find the perfect resources for you.</p>
+              <div class="quick-ask-form">
+                <input type="text" id="quickAskInput" class="form-control-custom"
+                       placeholder="e.g. Recommend books for B.Tech CSE semester 4…"
+                       onkeydown="if(event.key==='Enter') quickAsk()" />
+                <button class="btn btn-primary-custom mt-2 w-100" onclick="quickAsk()">
+                  <i class="bi bi-send me-2"></i>Get Recommendations
+                </button>
+              </div>
+              <div id="quickAskResult" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Library Info -->
+        <div class="col-lg-5">
+          <div class="card-custom h-100">
+            <div class="card-custom-header">
+              <i class="bi bi-info-circle me-2 text-accent"></i>Library Information
+            </div>
+            <div class="card-custom-body">
+              <div id="libraryInfoPanel">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line w-75"></div>
+                <div class="skeleton-line w-50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Books Row -->
+      <div class="card-custom mb-4">
+        <div class="card-custom-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-star-fill me-2 text-warning"></i>Featured & Highly Rated Books</span>
+          <button class="btn-link-custom" onclick="showView('search')">View All →</button>
+        </div>
+        <div class="card-custom-body">
+          <div class="featured-books-grid" id="featuredBooksGrid">
+            <div class="text-center text-muted py-4">
+              <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
+              <span class="ms-2">Loading catalog…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journal Access -->
+      <div class="card-custom mb-4">
+        <div class="card-custom-header">
+          <i class="bi bi-journal-bookmark-fill me-2" style="color:var(--gold)"></i>Digital Journal Access
+        </div>
+        <div class="card-custom-body" style="padding-bottom:18px">
+          <div id="journalsGrid">
+            <div class="text-muted py-2">Loading journals…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ───────────────────────────── CHAT VIEW ───────────────────────────── -->
+  <section id="viewChat" class="view-section">
+    <div class="chat-layout">
+
+      <!-- Sidebar (suggestions) -->
+      <aside class="chat-sidebar d-none d-xl-flex">
+        <div class="sidebar-title"><i class="bi bi-lightbulb me-2"></i>Quick Prompts</div>
+        <div class="quick-prompts">
+          <button class="prompt-chip" onclick="sendQuickPrompt('Recommend books for B.Tech CSE semester 3')">
+            📚 B.Tech CSE Sem 3 books
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('Best machine learning books for beginners')">
+            🤖 ML books for beginners
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('What are the library timings?')">
+            🕐 Library timings
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('Books on Python programming')">
+            🐍 Python programming books
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('How many books can I borrow?')">
+            📋 Borrowing rules
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('Recommend research papers on deep learning')">
+            🔬 Deep learning research
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('Books on data structures and algorithms')">
+            🌳 DSA books
+          </button>
+          <button class="prompt-chip" onclick="sendQuickPrompt('Available journals on computer science')">
+            📰 CS Journals
+          </button>
+        </div>
+
+        <hr class="sidebar-divider" />
+        <div class="sidebar-title"><i class="bi bi-clock-history me-2"></i>Session Info</div>
+        <div class="session-info" id="sidebarSessionInfo">
+          <div class="session-item">
+            <i class="bi bi-person"></i>
+            <span id="sidebarProfileName">Guest</span>
+          </div>
+          <div class="session-item">
+            <i class="bi bi-mortarboard"></i>
+            <span id="sidebarProfileCourse">Set your course →</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Chat main area -->
+      <div class="chat-main">
+        <div class="chat-header">
+          <div class="chat-agent-info">
+            <div class="agent-avatar"><i class="bi bi-robot"></i></div>
+            <div>
+              <div class="agent-name">Lexis — AI Librarian</div>
+              <div class="agent-status"><span class="status-dot"></span>Powered by IBM Granite</div>
+            </div>
+          </div>
+          <button class="icon-btn" onclick="clearChat()" title="Clear chat">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Greeting injected by JS -->
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-indicator d-none" id="typingIndicator">
+          <div class="agent-avatar sm"><i class="bi bi-robot"></i></div>
+          <div class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Input bar -->
+        <div class="chat-input-bar">
+          <div class="chat-input-wrapper">
+            <textarea id="chatInput" class="chat-textarea" rows="1"
+              placeholder="Ask about books, recommendations, library services…"
+              onkeydown="handleChatKey(event)"
+              oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+          <div class="chat-hints">
+            <span>Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ──────────────────────────── SEARCH VIEW ──────────────────────────── -->
+  <section id="viewSearch" class="view-section">
+    <div class="container-fluid px-3 px-md-4">
+
+      <div class="page-header mb-4">
+        <h2 class="page-title"><i class="bi bi-search me-2"></i>Book Catalog Search</h2>
+        <p class="page-subtitle">Search by title, author, subject, or browse by course</p>
+      </div>
+
+      <!-- Search Controls -->
+      <div class="card-custom mb-4">
+        <div class="card-custom-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-6">
+              <label class="form-label-custom">Search Books</label>
+              <div class="search-input-group">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="searchInput" class="form-control-custom ps-5"
+                       placeholder="Title, author, subject, keyword…"
+                       onkeydown="if(event.key==='Enter') doSearch()" />
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label-custom">Browse by Course</label>
+              <select id="courseFilter" class="form-control-custom" onchange="doCourseSearch()">
+                <option value="">All Courses</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <button class="btn btn-primary-custom w-100" onclick="doSearch()">
+                <i class="bi bi-search me-2"></i>Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="searchResultsContainer">
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-search display-4 opacity-25"></i>
+          <p class="mt-2">Enter a search term to find books</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ──────────────────────────── PROFILE VIEW ─────────────────────────── -->
+  <section id="viewProfile" class="view-section">
+    <div class="container-fluid px-3 px-md-4">
+
+      <div class="page-header mb-4">
+        <h2 class="page-title"><i class="bi bi-person-circle me-2"></i>My Profile</h2>
+        <p class="page-subtitle">Set your course and preferences to get personalised recommendations</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Profile Form -->
+        <div class="col-lg-6" id="profileFormSection">
+          <div class="card-custom">
+            <div class="card-custom-header">
+              <i class="bi bi-person me-2 text-accent"></i>Student Information
+            </div>
+            <div class="card-custom-body">
+              <div class="mb-3">
+                <label class="form-label-custom">Full Name</label>
+                <input type="text" id="profileName" class="form-control-custom" placeholder="Your name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label-custom">Student ID</label>
+                <input type="text" id="profileStudentId" class="form-control-custom" placeholder="e.g. 22CSE1001" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label-custom">Email</label>
+                <input type="email" id="profileEmail" class="form-control-custom" placeholder="student@university.edu" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label-custom">Course</label>
+                <select id="profileCourse" class="form-control-custom">
+                  <option value="">Select your course</option>
+                  <option value="B.Tech CSE">B.Tech Computer Science &amp; Engineering</option>
+                  <option value="B.Tech IT">B.Tech Information Technology</option>
+                  <option value="B.Tech ECE">B.Tech Electronics &amp; Communication</option>
+                  <option value="B.Tech EEE">B.Tech Electrical &amp; Electronics</option>
+                  <option value="B.Tech Mech">B.Tech Mechanical Engineering</option>
+                  <option value="B.Tech Civil">B.Tech Civil Engineering</option>
+                  <option value="M.Tech CSE">M.Tech Computer Science</option>
+                  <option value="M.Tech AI">M.Tech Artificial Intelligence</option>
+                  <option value="M.Tech ECE">M.Tech Electronics</option>
+                  <option value="MCA">Master of Computer Applications</option>
+                  <option value="MBA">Master of Business Administration</option>
+                  <option value="B.Sc CS">B.Sc Computer Science</option>
+                  <option value="PhD CSE">PhD Computer Science</option>
+                  <option value="PhD">PhD (General)</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="form-label-custom">Current Semester</label>
+                <select id="profileSemester" class="form-control-custom">
+                  <option value="">Select semester</option>
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                </select>
+              </div>
+              <button class="btn btn-primary-custom w-100" onclick="saveProfile()">
+                <i class="bi bi-save me-2"></i>Save Profile
+              </button>
+              <div id="profileSaveMsg" class="mt-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Reservations -->
+        <div class="col-lg-6" id="reservationsSection">
+          <div class="card-custom mb-3">
+            <div class="card-custom-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-bookmark-check me-2 text-accent"></i>My Reservations</span>
+              <button class="btn-link-custom small" onclick="loadReservations()"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div class="card-custom-body">
+              <div id="reservationsPanel">
+                <div class="text-muted text-center py-3">
+                  <i class="bi bi-bookmark display-6 opacity-25"></i>
+                  <p class="mt-2 mb-0 small">No active reservations</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Borrowing History -->
+          <div class="card-custom" id="historySection">
+            <div class="card-custom-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-clock-history me-2 text-accent"></i>Borrowing History</span>
+              <button class="btn-link-custom small" onclick="loadBorrowHistory()"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div class="card-custom-body">
+              <div id="historyPanel">
+                <div class="text-muted text-center py-3">
+                  <i class="bi bi-clock-history display-6 opacity-25"></i>
+                  <p class="mt-2 mb-0 small">No borrowing history yet</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     BOOK DETAIL MODAL
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="bookModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content modal-custom">
+      <div class="modal-header-custom">
+        <h5 class="modal-title" id="modalBookTitle">Book Detail</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalBookBody">
+        <div class="text-center py-4">
+          <div class="spinner-border text-accent" role="status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     AUTH MODAL (Login / Register)
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="authModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+    <div class="modal-content modal-custom">
+      <div class="modal-header-custom">
+        <h5 class="modal-title" id="authModalTitle">Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+
+        <!-- Login Form -->
+        <div id="loginForm">
+          <div class="mb-3">
+            <label class="form-label-custom">Email</label>
+            <input type="email" id="loginEmail" class="form-control-custom" placeholder="your@email.edu" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Password</label>
+            <input type="password" id="loginPassword" class="form-control-custom" placeholder="Password" />
+          </div>
+          <div id="loginError" class="text-danger small mb-2 d-none"></div>
+          <button class="btn btn-primary-custom w-100 mb-3" onclick="doLogin()">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+          </button>
+          <p class="text-center text-muted small mb-0">
+            Don't have an account?
+            <a href="#" onclick="switchAuthMode('register')" style="color:var(--accent)">Register</a>
+          </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="d-none">
+          <div class="mb-3">
+            <label class="form-label-custom">Full Name</label>
+            <input type="text" id="regName" class="form-control-custom" placeholder="Your Name" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Student ID</label>
+            <input type="text" id="regStudentId" class="form-control-custom" placeholder="e.g. 22CSE1001" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Email</label>
+            <input type="email" id="regEmail" class="form-control-custom" placeholder="your@email.edu" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Password <span class="text-muted">(min 6 chars)</span></label>
+            <input type="password" id="regPassword" class="form-control-custom" placeholder="Create password" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Course</label>
+            <select id="regCourse" class="form-control-custom">
+              <option value="">Select course (optional)</option>
+              <option value="B.Tech CSE">B.Tech CSE</option>
+              <option value="B.Tech IT">B.Tech IT</option>
+              <option value="B.Tech ECE">B.Tech ECE</option>
+              <option value="M.Tech CSE">M.Tech CSE</option>
+              <option value="MCA">MCA</option>
+              <option value="MBA">MBA</option>
+              <option value="B.Sc CS">B.Sc CS</option>
+              <option value="PhD CSE">PhD CSE</option>
+            </select>
+          </div>
+          <div id="regError" class="text-danger small mb-2 d-none"></div>
+          <button class="btn btn-primary-custom w-100 mb-3" onclick="doRegister()">
+            <i class="bi bi-person-plus me-2"></i>Create Account
+          </button>
+          <p class="text-center text-muted small mb-0">
+            Already have an account?
+            <a href="#" onclick="switchAuthMode('login')" style="color:var(--accent)">Login</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Toast notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════════════════════ -->
+<footer style="
+  background: var(--navy);
+  border-top: 3px solid var(--gold);
+  padding: 22px 24px 18px;
+  text-align: center;
+  margin-top: auto;
+">
+  <div style="max-width: 720px; margin: 0 auto;">
+    <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: .3px;">
+      <i class="bi bi-book-half me-2" style="color:var(--gold)"></i>University Central Library AI Agent
+    </div>
+    <div style="font-size: 12px; color: rgba(255,255,255,.65); margin-bottom: 10px;">
+      Powered by <span style="color:var(--gold);font-weight:600">IBM watsonx &amp; Granite</span>
+      &nbsp;·&nbsp; For educational and demonstration purposes only
+    </div>
+    <div style="
+      font-size: 11px; color: rgba(255,255,255,.4);
+      border-top: 1px solid rgba(255,255,255,.12);
+      padding-top: 10px; line-height: 1.7;
+    ">
+      Journal names, logos, trademarks, and content belong to their respective publishers.
+      External resources are opened only through official publisher websites.<br>
+      &copy; University Central Library &nbsp;·&nbsp; Demonstration Project
+    </div>
+  </div>
+</footer>
+
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

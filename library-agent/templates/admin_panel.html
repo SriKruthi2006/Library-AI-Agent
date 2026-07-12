@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Library AI Agent</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    body { padding-top: 70px; }
+    .admin-header { background: linear-gradient(135deg,#1e293b,#334155); color:#fff; padding:24px 32px; border-radius:12px; margin-bottom:24px; }
+    .admin-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
+    .admin-stat .val { font-size:28px; font-weight:700; color:var(--accent); }
+    .admin-stat .lbl { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .admin-table { font-size:13px; }
+    .admin-table th { font-weight:600; color:var(--text-muted); font-size:11px; text-transform:uppercase; }
+    .admin-section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px; }
+    .admin-section h5 { font-size:15px; font-weight:700; margin-bottom:16px; }
+    .tab-btn { background:none; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:500; color:var(--text-muted); transition:all .2s; }
+    .tab-btn.active { background:var(--accent-light); color:var(--accent); }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .action-btn { background:var(--accent); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
+    .action-btn.red { background:var(--red); }
+    .action-btn.green { background:var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="app-navbar navbar fixed-top">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <div class="brand-icon"><i class="bi bi-book-half"></i></div>
+      <div class="brand-text">
+        <span class="brand-name">Library AI Agent</span>
+        <span class="brand-sub d-none d-md-block">Admin Panel</span>
+      </div>
+    </a>
+    <div class="d-flex gap-2">
+      <a href="/" class="nav-btn"><i class="bi bi-house me-1"></i>Main Site</a>
+      <button class="nav-btn" onclick="doAdminLogout()"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4">
+
+  <!-- Header -->
+  <div class="admin-header">
+    <h4 class="mb-1 fw-700">⚙️ Library Admin Dashboard</h4>
+    <p class="mb-0 opacity-75" style="font-size:13px">Manage books, users, borrows, reports and system settings</p>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="row g-3 mb-4" id="adminStatsRow">
+    <div class="col-6 col-md-3">
+      <div class="admin-stat">
+        <div class="val" id="aStatBooks">—</div>
+        <div class="lbl">Total Books</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="admin-stat">
+        <div class="val" id="aStatUsers">—</div>
+        <div class="lbl">Registered Users</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="admin-stat">
+        <div class="val" id="aStatBorrows">—</div>
+        <div class="lbl">Active Borrows</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="admin-stat">
+        <div class="val" id="aStatFines">—</div>
+        <div class="lbl">Total Fines (Rs)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <button class="tab-btn active" onclick="switchTab('books')"><i class="bi bi-book me-1"></i>Books</button>
+    <button class="tab-btn" onclick="switchTab('borrows')"><i class="bi bi-arrow-left-right me-1"></i>Borrows</button>
+    <button class="tab-btn" onclick="switchTab('users')"><i class="bi bi-people me-1"></i>Users</button>
+    <button class="tab-btn" onclick="switchTab('reports')"><i class="bi bi-bar-chart me-1"></i>Reports</button>
+    <button class="tab-btn" onclick="switchTab('issue')"><i class="bi bi-plus-circle me-1"></i>Issue Book</button>
+    <button class="tab-btn" onclick="switchTab('tools')"><i class="bi bi-tools me-1"></i>Tools</button>
+  </div>
+
+  <!-- ── BOOKS TAB ── -->
+  <div class="tab-content active" id="tab-books">
+    <div class="admin-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-book me-2"></i>Books Catalog</h5>
+        <button class="action-btn" onclick="showAddBookForm()"><i class="bi bi-plus me-1"></i>Add Book</button>
+      </div>
+      <div id="addBookForm" class="d-none mb-3 p-3" style="background:var(--surface-2);border-radius:8px">
+        <div class="row g-2">
+          <div class="col-md-4"><input id="nb_title" class="form-control form-control-sm" placeholder="Title*" /></div>
+          <div class="col-md-3"><input id="nb_authors" class="form-control form-control-sm" placeholder="Authors (comma-sep)" /></div>
+          <div class="col-md-2"><input id="nb_category" class="form-control form-control-sm" placeholder="Category" /></div>
+          <div class="col-md-1"><input id="nb_year" type="number" class="form-control form-control-sm" placeholder="Year" /></div>
+          <div class="col-md-2"><input id="nb_isbn" class="form-control form-control-sm" placeholder="ISBN" /></div>
+          <div class="col-md-3"><input id="nb_location" class="form-control form-control-sm" placeholder="Location (Shelf)" /></div>
+          <div class="col-md-2"><input id="nb_copies" type="number" class="form-control form-control-sm" placeholder="Copies" value="1" /></div>
+          <div class="col-md-3"><input id="nb_edition" class="form-control form-control-sm" placeholder="Edition" /></div>
+          <div class="col-md-4"><input id="nb_subjects" class="form-control form-control-sm" placeholder="Subjects (comma-sep)" /></div>
+          <div class="col-12 d-flex gap-2 mt-2">
+            <button class="action-btn" onclick="addBook()"><i class="bi bi-save me-1"></i>Save</button>
+            <button class="action-btn red" onclick="document.getElementById('addBookForm').classList.add('d-none')">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm admin-table" id="booksTable">
+          <thead><tr>
+            <th>ID</th><th>Title</th><th>Authors</th><th>Category</th>
+            <th>Copies</th><th>Available</th><th>Rating</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="booksTableBody"><tr><td colspan="8" class="text-muted text-center py-3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mt-2" id="booksPagination"></div>
+    </div>
+  </div>
+
+  <!-- ── BORROWS TAB ── -->
+  <div class="tab-content" id="tab-borrows">
+    <div class="admin-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Borrow Records</h5>
+        <select id="borrowStatusFilter" class="form-select form-select-sm w-auto" onchange="loadBorrows()">
+          <option value="">All</option>
+          <option value="borrowed">Borrowed</option>
+          <option value="overdue">Overdue</option>
+          <option value="returned">Returned</option>
+        </select>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm admin-table" id="borrowsTable">
+          <thead><tr>
+            <th>ID</th><th>User</th><th>Book</th><th>Borrow Date</th>
+            <th>Due Date</th><th>Status</th><th>Fine</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="borrowsTableBody"><tr><td colspan="8" class="text-muted text-center py-3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── USERS TAB ── -->
+  <div class="tab-content" id="tab-users">
+    <div class="admin-section">
+      <h5><i class="bi bi-people me-2"></i>Registered Users</h5>
+      <div class="table-responsive">
+        <table class="table table-sm admin-table">
+          <thead><tr>
+            <th>ID</th><th>Name</th><th>Email</th><th>Student ID</th>
+            <th>Course</th><th>Level</th><th>Admin</th><th>Joined</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="usersTableBody"><tr><td colspan="9" class="text-muted text-center py-3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REPORTS TAB ── -->
+  <div class="tab-content" id="tab-reports">
+    <div class="admin-section">
+      <h5><i class="bi bi-bar-chart me-2"></i>Library Reports</h5>
+      <div id="reportsContent" class="row g-3">
+        <div class="text-muted text-center py-3">Loading reports…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ISSUE BOOK TAB ── -->
+  <div class="tab-content" id="tab-issue">
+    <div class="admin-section">
+      <h5><i class="bi bi-plus-circle me-2"></i>Issue / Return Book (Admin)</h5>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <h6 style="font-size:13.5px;font-weight:600">Issue Book to Student</h6>
+          <div class="mb-2"><input id="issue_student_id" class="form-control form-control-sm" placeholder="Student ID" /></div>
+          <div class="mb-2"><input id="issue_book_id" class="form-control form-control-sm" placeholder="Book ID (e.g. B001)" /></div>
+          <div class="mb-2"><input id="issue_days" type="number" class="form-control form-control-sm" placeholder="Duration (days, default 14)" value="14" /></div>
+          <button class="action-btn green" onclick="adminIssueBook()"><i class="bi bi-book me-1"></i>Issue Book</button>
+          <div id="issueMsg" class="mt-2 small"></div>
+        </div>
+        <div class="col-md-6">
+          <h6 style="font-size:13.5px;font-weight:600">Return Book (by Borrow ID)</h6>
+          <div class="mb-2"><input id="ret_borrow_id" type="number" class="form-control form-control-sm" placeholder="Borrow Record ID" /></div>
+          <button class="action-btn" onclick="adminReturnBook()"><i class="bi bi-arrow-return-left me-1"></i>Process Return</button>
+          <div id="returnMsg" class="mt-2 small"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOOLS TAB ── -->
+  <div class="tab-content" id="tab-tools">
+    <div class="admin-section">
+      <h5><i class="bi bi-tools me-2"></i>System Tools</h5>
+      <div class="d-flex flex-wrap gap-3">
+        <div>
+          <button class="action-btn green" onclick="runSeed()">
+            <i class="bi bi-database-add me-1"></i>Seed DB from JSON
+          </button>
+          <div id="seedMsg" class="small mt-2"></div>
+        </div>
+        <div>
+          <button class="action-btn" onclick="runOverdueCheck()">
+            <i class="bi bi-exclamation-triangle me-1"></i>Run Overdue Check
+          </button>
+          <div id="overdueMsg" class="small mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+"use strict";
+
+let currentBooksPage = 1;
+
+async function api(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+async function apiPost(url, body) {
+  const res = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+  if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || `HTTP ${res.status}`); }
+  return res.json();
+}
+async function apiDelete(url) {
+  const res = await fetch(url, { method:"DELETE" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+function esc(s) { return s==null?"":String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function showToast(msg, type="info") {
+  const c = document.getElementById("toastContainer");
+  const d = document.createElement("div");
+  d.className = "custom-toast " + type;
+  d.style.marginBottom = "8px";
+  d.innerHTML = `<span>${esc(msg)}</span>`;
+  c.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  document.querySelectorAll(".tab-btn").forEach(b => { if (b.textContent.toLowerCase().includes(name)) b.classList.add("active"); });
+  if (name === "books")   loadBooks();
+  if (name === "borrows") loadBorrows();
+  if (name === "users")   loadUsers();
+  if (name === "reports") loadReports();
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+async function loadAdminStats() {
+  try {
+    const d = await api("/api/admin/reports");
+    document.getElementById("aStatBooks").textContent   = d.total_books;
+    document.getElementById("aStatUsers").textContent   = d.total_users;
+    document.getElementById("aStatBorrows").textContent = d.active_borrows;
+    document.getElementById("aStatFines").textContent   = "₹" + d.total_fines_inr;
+  } catch(e) {}
+}
+
+// ── Books ──────────────────────────────────────────────────────────────────
+async function loadBooks(page=1) {
+  currentBooksPage = page;
+  try {
+    const d = await api(`/api/admin/books?page=${page}&per_page=20`);
+    const tbody = document.getElementById("booksTableBody");
+    tbody.innerHTML = d.books.map(b => `
+      <tr>
+        <td>${esc(b.id)}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title)}</td>
+        <td>${esc((b.authors||[]).slice(0,2).join(", "))}</td>
+        <td>${esc(b.category)}</td>
+        <td>${b.total_copies}</td>
+        <td><span class="${b.available_copies>0?"text-success":"text-danger"}">${b.available_copies}</span></td>
+        <td>${b.rating}</td>
+        <td>
+          <button class="action-btn red" onclick="softDeleteBook(${b.db_id})">Delete</button>
+        </td>
+      </tr>`).join("") || `<tr><td colspan="8" class="text-muted text-center">No books found</td></tr>`;
+
+    const pag = document.getElementById("booksPagination");
+    pag.innerHTML = `<span style="font-size:12px;color:var(--text-muted)">Page ${d.page}/${d.pages} (${d.total} total)</span>
+      <div class="d-flex gap-2">
+        ${d.page > 1 ? `<button class="action-btn" onclick="loadBooks(${d.page-1})">← Prev</button>` : ""}
+        ${d.page < d.pages ? `<button class="action-btn" onclick="loadBooks(${d.page+1})">Next →</button>` : ""}
+      </div>`;
+  } catch(e) { document.getElementById("booksTableBody").innerHTML = `<tr><td colspan="8" class="text-danger">${esc(e.message)}</td></tr>`; }
+}
+
+function showAddBookForm() {
+  document.getElementById("addBookForm").classList.toggle("d-none");
+}
+
+async function addBook() {
+  const title   = document.getElementById("nb_title").value.trim();
+  if (!title) { showToast("Title required","error"); return; }
+  const authors = document.getElementById("nb_authors").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const body = {
+    title, authors,
+    category: document.getElementById("nb_category").value.trim() || "General",
+    year:     parseInt(document.getElementById("nb_year").value) || null,
+    isbn:     document.getElementById("nb_isbn").value.trim(),
+    location: document.getElementById("nb_location").value.trim(),
+    total_copies: parseInt(document.getElementById("nb_copies").value) || 1,
+    edition:  document.getElementById("nb_edition").value.trim(),
+    subjects: document.getElementById("nb_subjects").value.trim(),
+  };
+  try {
+    await apiPost("/api/admin/books", body);
+    showToast("Book added successfully","success");
+    document.getElementById("addBookForm").classList.add("d-none");
+    loadBooks(currentBooksPage);
+    loadAdminStats();
+  } catch(e) { showToast(e.message,"error"); }
+}
+
+async function softDeleteBook(dbId) {
+  if (!confirm("Delete this book? (Soft delete)")) return;
+  try {
+    await apiDelete(`/api/admin/books/${dbId}`);
+    showToast("Book deleted","info");
+    loadBooks(currentBooksPage);
+    loadAdminStats();
+  } catch(e) { showToast(e.message,"error"); }
+}
+
+// ── Borrows ────────────────────────────────────────────────────────────────
+async function loadBorrows() {
+  const status = document.getElementById("borrowStatusFilter").value;
+  try {
+    const d = await api(`/api/admin/borrows?status=${status}&per_page=30`);
+    const tbody = document.getElementById("borrowsTableBody");
+    tbody.innerHTML = d.borrows.map(r => `
+      <tr>
+        <td>${r.id}</td>
+        <td>—</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.title)}</td>
+        <td>${r.borrow_date}</td>
+        <td>${r.due_date}</td>
+        <td><span class="status-badge status-${r.status}">${r.status}</span></td>
+        <td>${r.fine_amount > 0 ? "₹"+r.fine_amount : "—"}</td>
+        <td>
+          ${r.status !== "returned" ? `<button class="action-btn green" onclick="adminReturnById(${r.id})">Return</button>` : "Returned"}
+        </td>
+      </tr>`).join("") || `<tr><td colspan="8" class="text-muted text-center">No records</td></tr>`;
+  } catch(e) {}
+}
+
+async function adminReturnById(borrowId) {
+  if (!confirm("Process return for borrow #" + borrowId + "?")) return;
+  try {
+    const d = await apiPost(`/api/admin/return/${borrowId}`, {});
+    showToast(d.message, "success");
+    loadBorrows();
+    loadAdminStats();
+  } catch(e) { showToast(e.message, "error"); }
+}
+
+// ── Users ──────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const d = await api("/api/admin/users?per_page=30");
+    const tbody = document.getElementById("usersTableBody");
+    tbody.innerHTML = d.users.map(u => `
+      <tr>
+        <td>${u.id}</td>
+        <td>${esc(u.name)}</td>
+        <td>${esc(u.email||"—")}</td>
+        <td>${esc(u.student_id||"—")}</td>
+        <td>${esc(u.course||"—")}</td>
+        <td>${esc(u.learning_level)}</td>
+        <td>${u.is_admin ? '<span class="text-warning fw-bold">Admin</span>' : "—"}</td>
+        <td>${esc(u.created_at||"")}</td>
+        <td>
+          ${!u.is_admin ? `<button class="action-btn" onclick="promoteUser(${u.id})">Promote</button>` : ""}
+        </td>
+      </tr>`).join("") || `<tr><td colspan="9" class="text-muted text-center">No users</td></tr>`;
+  } catch(e) {}
+}
+
+async function promoteUser(userId) {
+  if (!confirm("Promote user to Admin?")) return;
+  try {
+    const d = await apiPost(`/api/admin/users/${userId}/promote`, {});
+    showToast(d.message, "success");
+    loadUsers();
+  } catch(e) { showToast(e.message, "error"); }
+}
+
+// ── Reports ────────────────────────────────────────────────────────────────
+async function loadReports() {
+  try {
+    const d = await api("/api/admin/reports");
+    document.getElementById("reportsContent").innerHTML = `
+      <div class="col-md-4">
+        <div class="admin-stat">
+          <div class="val">${d.total_books}</div><div class="lbl">Total Books</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="admin-stat">
+          <div class="val">${d.total_users}</div><div class="lbl">Users</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="admin-stat">
+          <div class="val">${d.total_borrows}</div><div class="lbl">Total Borrows</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat">
+          <div class="val" style="color:var(--green)">${d.returned}</div><div class="lbl">Returned</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat">
+          <div class="val" style="color:var(--accent)">${d.active_borrows}</div><div class="lbl">Active</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat">
+          <div class="val" style="color:var(--red)">${d.overdue}</div><div class="lbl">Overdue</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat">
+          <div class="val" style="color:var(--yellow)">₹${d.unpaid_fines_inr}</div><div class="lbl">Unpaid Fines</div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div style="font-size:12px;color:var(--text-muted);text-align:right">Generated: ${d.generated_at}</div>
+      </div>`;
+  } catch(e) {}
+}
+
+// ── Issue / Return ─────────────────────────────────────────────────────────
+async function adminIssueBook() {
+  const student_id = document.getElementById("issue_student_id").value.trim();
+  const book_id    = document.getElementById("issue_book_id").value.trim();
+  const days       = parseInt(document.getElementById("issue_days").value) || 14;
+  const msgEl      = document.getElementById("issueMsg");
+  if (!student_id || !book_id) { msgEl.innerHTML = '<span class="text-danger">Student ID and Book ID required</span>'; return; }
+  try {
+    const d = await apiPost("/api/admin/borrow", { student_id, book_id, duration_days: days });
+    msgEl.innerHTML = `<span class="text-success">${esc(d.message)}</span>`;
+    showToast(d.message, "success");
+    loadAdminStats();
+  } catch(e) { msgEl.innerHTML = `<span class="text-danger">${esc(e.message)}</span>`; }
+}
+
+async function adminReturnBook() {
+  const borrowId = parseInt(document.getElementById("ret_borrow_id").value);
+  const msgEl    = document.getElementById("returnMsg");
+  if (!borrowId) { msgEl.innerHTML = '<span class="text-danger">Enter borrow record ID</span>'; return; }
+  try {
+    const d = await apiPost(`/api/admin/return/${borrowId}`, {});
+    msgEl.innerHTML = `<span class="text-success">${esc(d.message)}</span>`;
+    showToast(d.message, "success");
+    loadAdminStats();
+  } catch(e) { msgEl.innerHTML = `<span class="text-danger">${esc(e.message)}</span>`; }
+}
+
+// ── Tools ──────────────────────────────────────────────────────────────────
+async function runSeed() {
+  const msgEl = document.getElementById("seedMsg");
+  msgEl.innerHTML = "Seeding…";
+  try {
+    const d = await apiPost("/api/admin/seed", {});
+    msgEl.innerHTML = `<span class="text-success">✅ ${d.message} — Books: ${d.added_books}, Authors: ${d.added_authors}</span>`;
+    loadAdminStats();
+    loadBooks();
+  } catch(e) { msgEl.innerHTML = `<span class="text-danger">${esc(e.message)}</span>`; }
+}
+
+async function runOverdueCheck() {
+  const msgEl = document.getElementById("overdueMsg");
+  try {
+    const d = await apiPost("/api/admin/overdue-check", {});
+    msgEl.innerHTML = `<span class="text-success">✅ ${esc(d.message)}</span>`;
+    showToast(d.message, "success");
+    loadAdminStats();
+  } catch(e) { msgEl.innerHTML = `<span class="text-danger">${esc(e.message)}</span>`; }
+}
+
+async function doAdminLogout() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/";
+}
+
+// Initialise
+window.addEventListener("DOMContentLoaded", () => {
+  loadAdminStats();
+  loadBooks();
+});
+</script>
+</body>
+</html>
