@@ -3,13 +3,6 @@
 
 An intelligent, full-stack AI-powered library assistant built with **Python Flask** and **IBM watsonx.ai**. It provides personalised book recommendations, real-time catalog search, reservation management, and natural-language library assistance — all through a modern, responsive web interface.
 
----
-
-# 📚 Library AI Agent
-
-Powered by IBM watsonx.ai™ and IBM Granite Foundation Models
-
-Project description...
 
 ## 🚀 Live Deployment
 
@@ -25,7 +18,6 @@ Project description...
 - **Foundation Model:** IBM Granite
 - **Programming Language:** Python
 
-...
 
 ## ✨ Features
 
